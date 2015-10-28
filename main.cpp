@@ -154,5 +154,4 @@ main(int argc, char *argv[])
 
     
     std::cout << "End socket test" <<  std::endl;
-    exit(1);
 }
