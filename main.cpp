@@ -152,6 +152,7 @@ main(int argc, char *argv[])
         thread2.join();
     }
 
-    
+    SSLSocket::clearRegister();
     std::cout << "End socket test" <<  std::endl;
+    return 0;
 }
