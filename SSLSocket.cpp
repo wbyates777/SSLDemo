@@ -718,8 +718,8 @@ SSLSocket::verify_callback(int ok, X509_STORE_CTX *ctx)
     int  err =	X509_STORE_CTX_get_error(ctx);
     
     // if testing with your own self signed certificates uncomment this
-    if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) // self signed certificate
-        return 1;
+    // if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) // self signed certificate
+    //    return 1;
     
     int depth =	X509_STORE_CTX_get_error_depth(ctx);
     

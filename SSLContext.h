@@ -44,7 +44,7 @@ public:
     
     SSLContext( void ) : m_server(0),
                          m_certificateCheck(0),
-                         m_verifyPeer(0),
+                         m_verifyPeer(1),
                          m_useDH(1),
                          m_name("client"),
                          m_cipherList("HIGH:!aNULL:!NULL:eNULL:!SRP:!PSK:!CAMELLIA:!RC4:!MD5:!DSS"), 
@@ -56,7 +56,7 @@ public:
     SSLContext( const std::string& name, const std::string& keyfile, const std::string& password, bool server = false )
                         : m_server(server),
                           m_certificateCheck(0),
-                          m_verifyPeer(0),
+                          m_verifyPeer(1),
                           m_useDH(1),
                           m_name(name),
                           m_cipherList("HIGH:!aNULL::!NULL:eNULL!SRP:!PSK:!CAMELLIA:!RC4:!MD5:!DSS"), 
