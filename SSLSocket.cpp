@@ -25,7 +25,7 @@
     Very simple secure socket class
     We use the OpenSSL interface, see https://wiki.openssl.org/index.php/Main_Page  
     and the TLS protocol, see https://tools.ietf.org/html/rfc5246 
-    The implementation of OpenSSL used here is LibreSSL 2.3.0 released September 23, 2015, see http://www.libressl.org
+    The implementation of OpenSSL used here is LibreSSL 2.9.2 released  May 20th, 2019, see https://www.libressl.org
     We support session resumption on server and client sides
 
     See also: 
@@ -72,7 +72,7 @@ sigpipe_handle(int x)
 }
 
 // initialise the SSL library
-// see https://wiki.openssl.org/index.php/Manual:SSL_library_init(3)
+// see https://www.openssl.org/docs/manmaster/man3/SSL_library_init
 int 
 SSLSocket::sslInitialiseLibrary( void )
 {
@@ -88,8 +88,6 @@ SSLSocket::registerContext( SSLContext *context )
 { 
     std::map<std::string,SSL_CTX*>::const_iterator idx = m_contextFactory.find( context->getName() );
     SSL_CTX* ctx =  (idx != m_contextFactory.end()) ? idx->second : 0;
-    
-    //SSL_CTX* ctx = findstd::mapValue(m_contextFactory, context->getName(), (SSL_CTX*) 0);
     
     if (ctx)
         SSL_CTX_free(ctx);
@@ -139,11 +137,11 @@ SSLSocket::~SSLSocket()
     
     if (m_sslSocket)
     {
-        // see https://wiki.openssl.org/index.php/Manual:SSL_shutdown(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_shutdown
         if (SSL_shutdown (m_sslSocket) == 0)
             SSL_shutdown (m_sslSocket);
         
-        // see https://wiki.openssl.org/index.php/Manual:SSL_free(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_free
         SSL_free (m_sslSocket);
         m_sslSocket = 0;
     }
@@ -187,11 +185,11 @@ SSLSocket::close(void)
         
     if (m_sslSocket)
     {        
-        // see https://wiki.openssl.org/index.php/Manual:SSL_shutdown(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_shutdown
         if (SSL_shutdown (m_sslSocket) == 0)
             SSL_shutdown (m_sslSocket);
   
-        // see https://wiki.openssl.org/index.php/Manual:SSL_clear(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_clear
         if (SSL_clear(m_sslSocket) == 0)
             ERR_print_errors_fp(stderr);
     }
@@ -227,12 +225,12 @@ SSLSocket::sslContext( SSLContext  *info )
     
     // sets the SSL_VERIFY_PEER flag and the verify callback so certificate chain issuer and subject information can be printed. 
     // if you do not want to perform custom processing, then set the callback to NULL
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_verify(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_verify
     if (info->getVerifyPeer())
         SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback); // no diagnostics
     
     // load our keys and certificates
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_use_certificate(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_use_certificate
     if (SSL_CTX_use_certificate_chain_file(ctx, info->getKeyfile().c_str()) != 1)
     {
         std::cout << "Could not read certificate file" << std::endl;
@@ -243,12 +241,12 @@ SSLSocket::sslContext( SSLContext  *info )
     
     // set up a password call back function so that we can decrypt the private keyfile
     // these methods do not provide diagnostic information.
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_default_passwd_cb(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_default_passwd_cb
     SSL_CTX_set_default_passwd_cb(ctx, pem_password_cb);    
     SSL_CTX_set_default_passwd_cb_userdata( ctx, (void *) info->getPassword().c_str());
     
     // read the private key file
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_use_certificate(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_use_certificate
     if (SSL_CTX_use_PrivateKey_file(ctx, info->getKeyfile().c_str(), SSL_FILETYPE_PEM) != 1)
     {
         ERR_print_errors_fp (stderr);
@@ -258,7 +256,7 @@ SSLSocket::sslContext( SSLContext  *info )
     }
     
     // load the Certificate Authorities we trust; unencrypted as CA's are public domain
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_load_verify_locations(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations
     if (SSL_CTX_load_verify_locations(ctx, info->getCertificateList().c_str(), 0) != 1)
     {
         ERR_print_errors_fp (stderr);
@@ -268,7 +266,7 @@ SSLSocket::sslContext( SSLContext  *info )
     }
     
     // set up prefered ciphers; returns 1 if any cipher could be set; 0 if none
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_cipher_list(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_cipher_list
     if (!info->getCipherList().empty())
     {
         if (!SSL_CTX_set_cipher_list(ctx, (char *) info->getCipherList().c_str() ))
@@ -280,7 +278,7 @@ SSLSocket::sslContext( SSLContext  *info )
     }
     
     // use TLS protocol by disabling SSLv2 and SSLv3
-    // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_options(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_options
     const long flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION;
     SSL_CTX_set_options(ctx, flags); // returns new bitmask
     
@@ -302,11 +300,11 @@ SSLSocket::sslContext( SSLContext  *info )
                 
         // for each session  created in this context we set its context id to getName()
         // this is needed if for example we plan to save sessions outside of cache 
-        // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_session_id_context(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_session_id_context
         SSL_CTX_set_session_id_context(ctx, (unsigned  char *) info->getName().c_str(), 5);
         SSL_CTX_set_timeout(ctx, 250);
         
-        // see https://wiki.openssl.org/index.php/Manual:SSL_CTX_set_session_cache_mode(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_session_cache_mode
         SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
     }
     
@@ -348,7 +346,7 @@ SSLSocket::accept( SSLSocket& new_socket ) const
     // initiate SSL handshake
     if (SSL_accept(new_socket.m_sslSocket) == 1)
     {
-        // see https://wiki.openssl.org/index.php/Manual:SSL_session_reused(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_session_reused
         //if (SSL_session_reused(new_socket.m_sslSocket) != 1)
         //    std::cout << "************* Server Session New" << std::endl;
         
@@ -421,7 +419,7 @@ SSLSocket::reconnect( void )
         return false;
     
     // attatch the unencrypted connection m_socket to our SSL socket
-    // see https://wiki.openssl.org/index.php/Manual:SSL_set_fd(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_set_fd
     if (!SSL_set_fd(m_sslSocket, m_socket))
     {
         ERR_print_errors_fp (stderr); 
@@ -430,18 +428,18 @@ SSLSocket::reconnect( void )
     
     // resume this session if possible returns 1 on success;
     // increments ref count on m_sslSession by one *if* it differs from one in context
-    // see https://wiki.openssl.org/index.php/Manual:SSL_set_session(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_set_session
     if (m_sslSession)
         SSL_set_session(m_sslSocket, m_sslSession);
 
     // initiate SSL handshakem 
     if (SSL_connect(m_sslSocket) == 1)
     {
-        // see https://wiki.openssl.org/index.php/Manual:SSL_session_reused(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_session_reused
         //if (SSL_session_reused(m_sslSocket) != 1)
         //    std::cout << "************* Client Session New" << std::endl;
         
-        // see https://wiki.openssl.org/index.php/Manual:SSL_get_session(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_get_session
         SSL_SESSION *s = SSL_get1_session(m_sslSocket);
         
         if (s != m_sslSession)
@@ -473,18 +471,18 @@ SSLSocket::reconnect( const int seconds, const int microseconds )
     
     // resume this session if possible returns 1 on success;
     // increments ref count on m_sslSession by one *if* it differs from one in context
-    // see https://wiki.openssl.org/index.php/Manual:SSL_set_session(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_set_session
     if (m_sslSession)
         SSL_set_session(m_sslSocket, m_sslSession);
     
     // initiate SSL handshakem 
     if (SSL_connect(m_sslSocket) == 1)
     {
-        // see https://wiki.openssl.org/index.php/Manual:SSL_session_reused(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_session_reused
         //if (SSL_session_reused(m_sslSocket) != 1)
         //    std::cout << "************* Client Session New" << std::endl;
         
-        // see https://wiki.openssl.org/index.php/Manual:SSL_get_session(3)
+        // see https://www.openssl.org/docs/manmaster/man3/SSL_get_session
         SSL_SESSION *s = SSL_get1_session(m_sslSocket);
         
         if (s != m_sslSession)
@@ -541,7 +539,7 @@ SSLSocket::receive( std::vector<char>& msg )  const
     bool isEOM = false; // is End Of Message?
     
     // read the size of the incomming message in bytes as an int
-    // see https://wiki.openssl.org/index.php/Manual:SSL_read(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_read
     int size = -1;
     int nread = 0;
     int tread = 0;
@@ -593,7 +591,7 @@ SSLSocket::certificateCheck( const std::string& host ) const
 // see https://en.wikipedia.org/wiki/X.509
 {  
     long errnum = 0;
-    // see https://wiki.openssl.org/index.php/Manual:SSL_get_verify_result(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_get_verify_result
     if ((errnum = SSL_get_verify_result(m_sslSocket)) != X509_V_OK) // errnum = 1 is for uninitialized values
     {
         ERR_print_errors_fp(stderr);
@@ -601,7 +599,7 @@ SSLSocket::certificateCheck( const std::string& host ) const
         //exit(1);
     }
     
-    // see https://wiki.openssl.org/index.php/Manual:SSL_get_peer_certificate(3)
+    // see https://www.openssl.org/docs/manmaster/man3/SSL_get_peer_certificate
     X509 *peer = SSL_get_peer_certificate( m_sslSocket );
     
     char peer_CN[256];
@@ -718,8 +716,8 @@ SSLSocket::verify_callback(int ok, X509_STORE_CTX *ctx)
     int  err =	X509_STORE_CTX_get_error(ctx);
     
     // if testing with your own self signed certificates uncomment this
-    // if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) // self signed certificate
-    //    return 1;
+    if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) // self signed certificate
+        return 1;
     
     int depth =	X509_STORE_CTX_get_error_depth(ctx);
     
