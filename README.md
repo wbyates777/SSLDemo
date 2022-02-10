@@ -1,6 +1,5 @@
 10/02/22
 
-WARNING this code does not work at the moment - I'm reviewing as to why
 
 # SSLDemo
 A C++ program that demonstrates the use of the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols 
