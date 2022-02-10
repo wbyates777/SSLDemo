@@ -1,5 +1,3 @@
-10/02/22
-
 
 # SSLDemo
 A C++ program that demonstrates the use of the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols 
@@ -18,4 +16,4 @@ in the method
 in the file SSLSocket.cpp. Otherwise the demo will *NOT* work
 
 
-WBY
+WBY 10/02/22
