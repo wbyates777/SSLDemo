@@ -25,7 +25,7 @@
     Very simple secure socket class
     We use the OpenSSL interface, see https://wiki.openssl.org/index.php/Main_Page  
     and the TLS protocol, see https://tools.ietf.org/html/rfc5246 
-    The implementation of OpenSSL used here is LibreSSL 2.9.2 released  May 20th, 2019, see https://www.libressl.org
+    The implementation of OpenSSL used here is LibreSSL 3.4.2 released November 25, 2021, see https://www.libressl.org
     We support session resumption on server and client sides
 
     See also: 
