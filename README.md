@@ -1,6 +1,7 @@
 
 # SSLDemo
-A C++ program that demonstrates the use of the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols 
+A C++ program that demonstrates the use of the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols.
+Use create_certs.sh to create the .pem and .crt files required to run the demonstration.
 
 By default (for safety) the code verifies certificates and will *REJECT* self signed certificates.
 If you are testing this code with the bundled self signed certificates you must uncomment the lines
@@ -16,4 +17,4 @@ in the method
 in the file SSLSocket.cpp. Otherwise the demo will *NOT* work
 
 
-WBY 10/02/22
+WBY - Last updated 24/10/23
