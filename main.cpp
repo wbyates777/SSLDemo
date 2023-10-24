@@ -51,54 +51,58 @@
 #include "SSLSocket.h"
 #endif
 
+const int PORT = 4123;
+
 void
 sender1( SSLSocket *client ) 
 {
     int count = 3;
     if (client->open()) // 127.0.0.1
     {
-        std::cout << "client connecting"  << std::endl;
-        if (client->connect("127.0.0.1", 4123))
+        std::cout << "client1 connecting"  << std::endl;
+        if (client->connect("127.0.0.1", PORT))
         {
             while (count--)
             {
+                std::cout << "   client1 sending 'Hello World'" << std::endl;
                 client->send(std::string("Hello World"));
-                std::string ACK;
-                if (client->receive(ACK))
-                    std::cout << "client receiving " << ACK << std::endl;
+                std::string msg;
+                if (client->receive(msg))
+                    std::cout << "    client1 receiving " << msg << std::endl;
                 sleep(1);
             }
         }
     }
     client->close(); // close sends the EOF that allows receiver to read the message        
-    std::cout << "Client closed" << std::endl;
+    std::cout << "client1 closed" << std::endl;
 }
 
 void
 sender2( SSLSocket *client ) 
 {
     int count = 3;
-    std::cout << "client re-connecting"  << std::endl;
+    std::cout << "client2 re-connecting"  << std::endl;
     if (client->open() && client->reconnect())
     {
         while (count--)
         {
+            std::cout << "   client2 sending 'Hello World'" << std::endl;
             client->send(std::string("Hello World"));
-            std::string ACK;
-            if (client->receive(ACK))
-                std::cout << "  client receiving " << ACK << std::endl;;
+            std::string msg;
+            if (client->receive(msg))
+                std::cout << "   client2 receiving " << msg << std::endl;
             sleep(1);
         }
     }
     client->close(); // close sends the EOF that allows receiver to read the message        
-    std::cout << "Client closed" << std::endl;
+    std::cout << "client2 closed" << std::endl;
 }
 
 void
 rec( SSLSocket *server ) 
 {   
     server->open();
-    server->bind( 4123);
+    server->bind(PORT);
     server->listen();
     
     int count = 3;
@@ -114,10 +118,9 @@ rec( SSLSocket *server )
             std::string msgIn;
             if ( client.receive(msgIn) )
             {
-                std::cout << "Server recieved message: " << msgIn << std::endl;
+                std::cout << "Server recieved message: '" << msgIn << "'" << std::endl;
                 std::cout << "Server sending ACK" << std::endl;
-                std::string rep("ACK");
-                client.send(rep);
+                client.send("ACK");
             }
             sleep(1);
         }
@@ -126,17 +129,17 @@ rec( SSLSocket *server )
     std::cout << "Server closed" << std::endl;      
 }
 
-/*
- Problem when not using DH params
- */
+
 int
 main(int argc, char *argv[])
 {  
-    std::cout << "SSLDemo  Copyright (C) 2023,  W. B. Yates" << std::endl;
-    std::cout << "This program comes with ABSOLUTELY NO WARRANTY; for details see http://www.gnu.org/licenses/." << std::endl;
+    std::cout << "\nSSLDemo  Copyright (C) 2023,  W. B. Yates" << std::endl;
+    std::cout << "\nThis program comes with ABSOLUTELY NO WARRANTY;" << std::endl;
+    std::cout << "for details see http://www.gnu.org/licenses/." << std::endl;
     std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
-    std::cout << "under certain conditions; see http://www.gnu.org/licenses/" << std::endl;
+    std::cout << "under certain conditions; see http://www.gnu.org/licenses/\n" << std::endl;
     
+    //               name,     keyfile,      PEM pass phrase
     SSLContext ctx1("client", "client.pem", "password");
     SSLContext ctx2("server", "server.pem", "password", true);
     
@@ -155,12 +158,13 @@ main(int argc, char *argv[])
     for (int i = 0; i < 5; ++i)
     {
         std::cout << "\nBegin socket test " << i + 1 <<  std::endl;
-        std::thread thread1 = std::thread(rec,&server);
+        std::thread thread1 = std::thread(rec, &server);
         std::thread thread2;
         
         if (i == 0)
-            thread2 = std::thread(sender1,&client);
-        else thread2 = std::thread(sender2,&client);
+            thread2 = std::thread(sender1, &client);
+        else thread2 = std::thread(sender2, &client);
+        
         thread1.join();
         thread2.join();
     }
@@ -168,5 +172,4 @@ main(int argc, char *argv[])
     
     std::cout << "End socket test" <<  std::endl;
     SSLSocket::clearRegister();
-    exit(1);
 }
