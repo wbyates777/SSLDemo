@@ -61,7 +61,7 @@ Socket::getLocalIPAddress( void )
 		char *hostAddress = hostEntry->h_addr_list[0];
 		
 	
-		sprintf(IP, "%u.%u.%u.%u",	*((unsigned char *) &hostAddress[0]), 
+		std::snprintf(IP, 40, "%u.%u.%u.%u",	*((unsigned char *) &hostAddress[0]), 
 									*((unsigned char *) &hostAddress[1]),
 									*((unsigned char *) &hostAddress[2]),
 									*((unsigned char *) &hostAddress[3]));
@@ -82,7 +82,7 @@ Socket::getHostIPAddress( const std::string& host )
 		char *hostAddress = hostEntry->h_addr_list[0];
 		
 	
-		sprintf(IP, "%u.%u.%u.%u", *((unsigned char *) &hostAddress[0]), 
+		std::snprintf(IP, 40, "%u.%u.%u.%u", *((unsigned char *) &hostAddress[0]), 
                                    *((unsigned char *) &hostAddress[1]),
 								   *((unsigned char *) &hostAddress[2]),
 								   *((unsigned char *) &hostAddress[3]));	
@@ -191,7 +191,7 @@ Socket::connect( const std::string& IP, const int port )
 	m_addr.sin_port = htons( port );
 	
     // return 1 if ok, 0 if IP could not be parsed and -1 for error and errno set
-    ::inet_pton( AF_INET, IP.c_str(), &m_addr.sin_addr );
+    int t = ::inet_pton( AF_INET, IP.c_str(), &m_addr.sin_addr );
 	
 	if ( errno == EAFNOSUPPORT ) 
 		return false;
@@ -354,23 +354,20 @@ Socket::receive( std::vector<char>& msg )  const
     
     if (nread != sizeof(size))
         return false;
-    
-    // add the size of the initial integer that has already been read - this fix was added 10/02/22
     size += 4;
-	
-    while (!isEOM)
-    {
+	while (!isEOM)
+	{
         ::memset( buff, 0, BUFFSIZE );
-	int nleft = BUFFSIZE;
+		int nleft = BUFFSIZE;
         nread = 0;
         tread = 0;
-	char* ptr = buff;
+		char* ptr = buff;
         
-	for ( ; !isEOM && nleft > 0; nleft -= nread, ptr += nread )
-	{
-	    if (m_peek)
-		nread = ::recv(m_socket, ptr, nleft, MSG_PEEK);
-	    else nread = ::read(m_socket, ptr, nleft);
+		for ( ; !isEOM && nleft > 0; nleft -= nread, ptr += nread )
+		{
+			if (m_peek)
+				nread = ::recv(m_socket, ptr, nleft, MSG_PEEK);
+			else nread = ::read(m_socket, ptr, nleft);
 
             if (nread < 0)
                 return false;
@@ -382,12 +379,12 @@ Socket::receive( std::vector<char>& msg )  const
             
             tread += nread;
             aread += nread;
-	}
+		}
         
 		msg.insert(msg.end(), buff, buff + tread);
-    }
+	}
 	
-    return (aread == size); 
+	return (aread == size); 
 }
 
 bool 

@@ -19,22 +19,25 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/
     
- 
-    History:  
+     History:   
 
-    Very simple secure socket class
-    We use the OpenSSL interface, see https://wiki.openssl.org/index.php/Main_Page  
-    and the TLS protocol, see https://tools.ietf.org/html/rfc5246 
-    The implementation of OpenSSL used here is LibreSSL 3.4.2 released November 25, 2021, see https://www.libressl.org
-    We support session resumption on server and client sides
+     Very simple secure socket class
+     We use the OpenSSL interface, see https://wiki.openssl.org/index.php/Main_Page  
+     and the TLS protocol, see https://tools.ietf.org/html/rfc5246 
+     We support session resumption on server and client sides
+     
+     *** Updated 24/10/23 ***
 
-    See also: 
+     The implementation of OpenSSL used here is OpenSSL 3.1.3 19 Sep 2023
+     We recommend LibreSSL see https://www.libressl.org
 
-    https://en.wikipedia.org/wiki/X.509 
+     See also: 
 
-    https://en.wikipedia.org/wiki/Transport_Layer_Security
+     https://en.wikipedia.org/wiki/X.509 
 
-    Compile with the library flags:  -lssl -lcrypto
+     https://en.wikipedia.org/wiki/Transport_Layer_Security
+
+     Compile with the library flags:  -lssl -lcrypto
 
 
 */
@@ -233,7 +236,7 @@ SSLSocket::sslContext( SSLContext  *info )
     // see https://www.openssl.org/docs/manmaster/man3/SSL_CTX_use_certificate
     if (SSL_CTX_use_certificate_chain_file(ctx, info->getKeyfile().c_str()) != 1)
     {
-        std::cout << "Could not read certificate file" << std::endl;
+        std::cout << "Could not read certificate file " << info->getKeyfile().c_str() << std::endl;
         ERR_print_errors_fp (stderr);
         SSL_CTX_free(ctx);
         return 0;

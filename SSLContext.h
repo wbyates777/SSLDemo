@@ -45,25 +45,25 @@ public:
     SSLContext( void ) : m_server(0),
                          m_certificateCheck(0),
                          m_verifyPeer(0),
-                         m_useDH(1),
+                         m_useDH(0),
                          m_name("client"),
                          m_cipherList("HIGH:!aNULL:!NULL:eNULL:!SRP:!PSK:!CAMELLIA:!RC4:!MD5:!DSS"), 
                          m_certificateList("root.crt"), 
                          m_keyfile(),
                          m_password(),
-                         m_dhFile("dh1024.pem") {}
+                         m_dhFile("dhparams.pem") {}
     
     SSLContext( const std::string& name, const std::string& keyfile, const std::string& password, bool server = false )
                         : m_server(server),
                           m_certificateCheck(0),
                           m_verifyPeer(0),
-                          m_useDH(1),
+                          m_useDH(0),
                           m_name(name),
                           m_cipherList("HIGH:!aNULL::!NULL:eNULL!SRP:!PSK:!CAMELLIA:!RC4:!MD5:!DSS"), 
                           m_certificateList("root.crt"), 
                           m_keyfile(keyfile),
                           m_password(password),
-                          m_dhFile("dh1024.pem") {}
+                          m_dhFile("dhparams.pem") {}
     
     
     const std::string& 

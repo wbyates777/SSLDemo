@@ -25,9 +25,13 @@
     Very simple secure socket class
     We use the OpenSSL interface, see https://wiki.openssl.org/index.php/Main_Page  
     and the TLS protocol, see https://tools.ietf.org/html/rfc5246 
-    The implementation of OpenSSL used here is LibreSSL 3.4.2 released November 25, 2021, see http://www.libressl.org
     We support session resumption on server and client sides
-
+    
+    *** Updated 24/10/23 ***
+ 
+    The implementation of OpenSSL used here is OpenSSL 3.1.3 19 Sep 2023
+    We recommend LibreSSL see https://www.libressl.org
+ 
     See also: 
 
     https://en.wikipedia.org/wiki/X.509 
@@ -41,6 +45,7 @@
 
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 
 #ifndef __SSLSOCKET_H__
 #include "SSLSocket.h"
@@ -50,15 +55,19 @@ void
 sender1( SSLSocket *client ) 
 {
     int count = 3;
-    if (client->open() && client->connect("127.0.0.1", 4123))
+    if (client->open()) // 127.0.0.1
     {
-        while (count--)
+        std::cout << "client connecting"  << std::endl;
+        if (client->connect("127.0.0.1", 4123))
         {
-            client->send(std::string("Hello World"));
-            std::string ACK;
-            if (client->receive(ACK))
-                std::cout << "client receiving " << ACK << std::endl;;
-            sleep(1);
+            while (count--)
+            {
+                client->send(std::string("Hello World"));
+                std::string ACK;
+                if (client->receive(ACK))
+                    std::cout << "client receiving " << ACK << std::endl;
+                sleep(1);
+            }
         }
     }
     client->close(); // close sends the EOF that allows receiver to read the message        
@@ -69,6 +78,7 @@ void
 sender2( SSLSocket *client ) 
 {
     int count = 3;
+    std::cout << "client re-connecting"  << std::endl;
     if (client->open() && client->reconnect())
     {
         while (count--)
@@ -88,7 +98,7 @@ void
 rec( SSLSocket *server ) 
 {   
     server->open();
-    server->bind( 4123 );
+    server->bind( 4123);
     server->listen();
     
     int count = 3;
@@ -116,10 +126,13 @@ rec( SSLSocket *server )
     std::cout << "Server closed" << std::endl;      
 }
 
+/*
+ Problem when not using DH params
+ */
 int
 main(int argc, char *argv[])
 {  
-    std::cout << "SSLDemo  Copyright (C) 2015,  W. B. Yates" << std::endl;
+    std::cout << "SSLDemo  Copyright (C) 2023,  W. B. Yates" << std::endl;
     std::cout << "This program comes with ABSOLUTELY NO WARRANTY; for details see http://www.gnu.org/licenses/." << std::endl;
     std::cout << "This is free software, and you are welcome to redistribute it" << std::endl;
     std::cout << "under certain conditions; see http://www.gnu.org/licenses/" << std::endl;
@@ -152,7 +165,8 @@ main(int argc, char *argv[])
         thread2.join();
     }
 
-    SSLSocket::clearRegister();
+    
     std::cout << "End socket test" <<  std::endl;
-    return 0;
+    SSLSocket::clearRegister();
+    exit(1);
 }

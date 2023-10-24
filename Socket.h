@@ -151,10 +151,10 @@ public:
 protected:
     
     // copy/assignment disabled
-    Socket( const Socket& );
+    Socket( const Socket& )=delete;
     
     Socket&
-    operator=( const Socket& );
+    operator=( const Socket& )=delete;
     //
     
 	int    m_socket;
